@@ -8,8 +8,6 @@
 
         <link rel="stylesheet" href="css/style.css">
         
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="/js/app.js" charset="utf-8"></script>
 
         <title>Connect 4</title>
     </head>
@@ -19,11 +17,24 @@
         <h2 id="winner"></h2>
         <div id="board"></div>
 
-        <!-- <div id="lobbies">
-            <button id="create">Create a Lobby!</button>
-            <label for="join" id="join_label">Enter a Lobby Code:</label>
-            <input type="text" id="join">  
-        </div> -->
+        <div id="lobbies" class="wrapper, lobby">
+            <h1>Start Game</h1>
+            <div class="input-box">
+                <h2>Create a Lobby with the following password:</h2>
+                <input type="text" id="create" placeholder="Game Code..."><button id="createButton">Create</button>
+            </div>
+            <div class="input-box">
+                <h2>Enter a Lobby Code to Join:</h2>
+                <input type="text" id="join" placeholder="Game Code..."><button id="joinButton">Join</button>
+            </div>
+        </div>
+        <div id="lobbies" class="wrapper">
+        </div>
+
+    
 
     </body>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/app.js" charset="utf-8"></script>
 </html>

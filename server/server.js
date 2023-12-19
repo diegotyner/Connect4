@@ -16,7 +16,8 @@ server.listen(port, ()=> {
     console.log(`Server is up on port ${port}.`)
 });
 
-let lobbies = []
+let lobbies = [];
+let activeGames = [];
 
 io.on('connection', (socket) => {
     console.log('A user just connected.');
@@ -25,36 +26,39 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createLobby', (roomName) => {
+        if (lobbies.includes(roomName, 0) || activeGames.includes(roomName, 0)) {
+            io.to(socket.id).emit('createFailed');
+            return;
+        }
         socket.join(roomName);
         lobbies.push(roomName);
         console.log('Lobby created');
+        io.to(socket.id).emit('createSucceed');
     });
 
     socket.on('joinLobby', (roomName) => {
         console.log('Lobby join attempted');
         if (lobbies.includes(roomName, 0)) {
             socket.join(roomName);
-            io.to(roomName).emit("startGame", () => { 
-                Math.floor(Math.random() * ((1+ 1) + 0)),
-                roomName
-            }); // Randomly deciding who has start
+            let randInt = Math.floor(Math.random() * 2)
+            io.to(roomName).emit("startGame", randInt, roomName); // Randomly deciding who has start
             console.log("Game started with game code: " + roomName);
+
+            // Removing joinable lobby
+            let index = lobbies.indexOf(roomName);
+            lobbies.splice(index, 1);
+            activeGames.push(roomName);
         } else {
             io.to(socket.id).emit('joinFailed');
             console.log(roomName + " join failed")
         }
     });
 
-    socket.on('startGame', () => {
-        console.log("Do I even get this message?"); // Maybe specify game code started?
-    });
-
     socket.on('playerMove', (payload, roomName) => {
-        if (payload.done == 1) {
-            io.to(roomName).emit("gameOver");
-        } else {
+        if (payload[3] == true) {
+            io.to(roomName).emit("gameOver", payload[2]);
+        } 
         io.to(roomName).emit("playerMove", payload);
-        }
     });
 });
 
