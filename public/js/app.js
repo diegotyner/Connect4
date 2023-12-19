@@ -1,45 +1,5 @@
 let socket = io();
 
-/* Socket events:
-Getting in a lobby (create) (emit)
-- Enter code for the lobby creation
-- Should have confirmation that button was clicked
-- Red player 
-- Save the code as this players lobby code
-
-Getting in a lobby (join) (emit):
-- Save the code entered as player lobby code
-- Send to server requesting to join lobby:
- - Accepted: Will have game started for that game code
- - Rejected: Will be sent alert that join failed. 
-- Join Failed (listener):
-- Might be sent a failure from attempt to join, if so reset game code and continue.
-
-Game start (listener)
-- Hides initial buttons and reveals board
-- Receive info on whether red or yellow is current player. Only update then
-- Maybe display text if its your turn to move?
-
-Move (emit)
-- Can only emit during current move. Sends piece update and game code.
-- Will update own board 
-- No longer curr player, hide turn to move text
-- Game over (emit)
- - Will send the server info if there is a game over
-
-Move (listener)
-- Will listen during other player move. Waits to receive piece update (ignore if just moved?)
-- Gets sent info to update
-- Gets updated to curr player
-
-Game over (listener)
-- Will at all times wait for game over
-- Game over will make both players not curr player and will display winner
-*/
-
-// window.onload = function() {
-//     setGame();
-// }
 
 var currPlayer = false;
 var playerPiece;
@@ -207,12 +167,14 @@ socket.on("playerMove", (payload) => {
     }
     r -= 1; //update the row height for that column
     currColumns[c] = r; //update the array
+    
     if (!gameOver) {
         currPlayer = true;
     }
 }); 
 
 
+// Checking winner
 function checkWinner(r, c) {
     // A window that moves to the right three times, checking from left to right if there are 4 in a row
     for (let i = 0; i < 4; i++) {
@@ -227,6 +189,7 @@ function checkWinner(r, c) {
         console.log(ci);
     }
 
+
     // Up
     if (r <= 2) {
         if ( (board[r+3][c] === playerPiece) && (board[r+2][c] === playerPiece) && (board[r+1][c] === playerPiece)) {
@@ -235,6 +198,7 @@ function checkWinner(r, c) {
         }
     }
     
+
     // Sliding window for diagonals. Slides left and right at the same time.
     for (let i = 0; i < 4; i++) {
         let ri = r - i;
@@ -248,7 +212,6 @@ function checkWinner(r, c) {
             }
         }
 
-        
         // Checking top left dot right-left upwards
         ci = c - i;
         if ( (ci <= 3) && (ri <= 2) ) {

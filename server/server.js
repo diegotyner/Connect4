@@ -25,63 +25,45 @@ io.on('connection', (socket) => {
         console.log('A user has disconnected.');
     });
 
+    // Create lobby event, fires when client attempts to make a lobby
     socket.on('createLobby', (roomName) => {
         if (lobbies.includes(roomName, 0) || activeGames.includes(roomName, 0)) {
+            // Tell connecting client that this creation failed (code not available)
             io.to(socket.id).emit('createFailed');
+            console.log('Lobby creation failed');
             return;
         }
         socket.join(roomName);
         lobbies.push(roomName);
         console.log('Lobby created');
+        // Tell client creation succeeded
         io.to(socket.id).emit('createSucceed');
     });
 
+    // Join lobby event, when client attempts to join a game
     socket.on('joinLobby', (roomName) => {
         console.log('Lobby join attempted');
-        if (lobbies.includes(roomName, 0)) {
+        if (lobbies.includes(roomName, 0)) {    // There is an open lobby
             socket.join(roomName);
-            let randInt = Math.floor(Math.random() * 2)
-            io.to(roomName).emit("startGame", randInt, roomName); // Randomly deciding who has start
+            let randInt = Math.floor(Math.random() * 2);    // Randomly deciding who has start
+            io.to(roomName).emit("startGame", randInt, roomName);   // Emit to room that game started
             console.log("Game started with game code: " + roomName);
 
             // Removing joinable lobby
             let index = lobbies.indexOf(roomName);
             lobbies.splice(index, 1);
             activeGames.push(roomName);
-        } else {
+        } else {    // Not open lobby
             io.to(socket.id).emit('joinFailed');
             console.log(roomName + " join failed")
         }
     });
 
+    // Passing along newest move to clients
     socket.on('playerMove', (payload, roomName) => {
-        if (payload[3] == true) {
-            io.to(roomName).emit("gameOver", payload[2]);
+        if (payload[3] == true) {   // Payload[3] is state of the game. True means game over.
+            io.to(roomName).emit("gameOver", payload[2]);   // Payload[2] is piece of the move. Passing along winner
         } 
         io.to(roomName).emit("playerMove", payload);
     });
 });
-
-
-/* Five main socket event:
-Create lobby request (listener)
-- Should create lobbies when receive a create request
-
-Join lobby request (listener)
-- Search for unstarted lobby, if found game start
-- Else, Reject join (emit)
- - Player is waiting with that code, send them a connection failed with the received code
-
-Game start (emit)
-- Will send the successful code to the players. 
-- Randomly generates whether red or yellow player is curr player.
-
-Move (listener)
-- Will receive the current piece update. Starts the move emition. Will also check for game over. 
-- Move (emit)
- - Emits the most recent move to the game code received from
-- Game over (emit)
- - If received game over message, send to game code game over
-*/
-
-
