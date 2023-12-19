@@ -16,7 +16,7 @@ const lobby = document.querySelector('.lobby')
 const game_board = document.getElementById('board')
 var createButton = document.getElementById('createButton')
 var joinButton = document.getElementById('joinButton')
-
+const toMove = document.getElementById('toMove')
 
 
 // Create game block
@@ -70,6 +70,12 @@ socket.on('startGame', (num, code) => {
         currPlayer = true;
     } else {
         currPlayer = false;
+    }
+
+    if (currPlayer) {
+        toMove.innerText = "Your Turn To Move!";
+    } else {
+        toMove.innerText = "Waiting for opponents move...";
     }
 });
 
@@ -152,6 +158,7 @@ function setPiece() {
 }
 socket.on("playerMove", (payload) => {
     if (payload[2] === playerPiece) {
+        toMove.innerText = "Waiting for opponents move...";
         return;
     }
     r = payload[0];
@@ -170,6 +177,7 @@ socket.on("playerMove", (payload) => {
     
     if (!gameOver) {
         currPlayer = true;
+        toMove.innerText = "Your Turn To Move!";
     }
 }); 
 
